@@ -72,6 +72,8 @@ let letter = ['a'-'z' 'A'-'Z']
 
 let digit = ['0'-'9']
 
+let number = "0x"? digit+
+
 let name =  '_'* letter+ '_'* | '_' digit+ '_'*
 
 let ident = '.'? name+ | (name '_'+ name)+
@@ -88,6 +90,7 @@ rule format = parse
 | ','               { program := !program ^ ", "; col := !col + 2; format lexbuf }
 | label as lbl      { process_label lbl; format lexbuf }
 | ident as id       { process_identifier id; format lexbuf }
+| number as n       { process_operand n; format lexbuf }
 | comment as cmt    { process_comment cmt; format lexbuf }
 | _ as c            { program := !program ^ (String.make 1 c); incr col; format lexbuf }
 | eof               { !program }
@@ -100,6 +103,7 @@ and format_no_comments = parse
 | ','               { program := !program ^ ", "; col := !col + 2; format_no_comments lexbuf }
 | label as lbl      { process_label lbl; format_no_comments lexbuf }
 | ident as id       { process_identifier id; format_no_comments lexbuf }
+| number as n       { process_operand n; format_no_comments lexbuf }
 | comment           { format_no_comments lexbuf }
 | _ as c            { program := !program ^ (String.make 1 c); incr col; format_no_comments lexbuf }
 | eof               { !program }
